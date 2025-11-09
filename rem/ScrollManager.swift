@@ -45,10 +45,10 @@ class ScrollManager: ObservableObject {
     }
     
     private func startScrollTimer() {
-        scrollTimer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { _ in
+        scrollTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
             guard self.isScrollingActive else { return }
             
-            let scrollValue = self.currentDirection == .down ? 1 : -1
+            let scrollValue = self.currentDirection == .down ? 2 : -2
             
             // Создаем событие скролла
             let event = CGEvent(scrollWheelEvent2Source: nil,
@@ -64,14 +64,25 @@ class ScrollManager: ObservableObject {
     }
     
     private func startDirectionTimer() {
-        // Меняем направление каждые 5 секунд
-        directionTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { _ in
+        directionTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval.random(in: 3...15), repeats: true) { _ in
             guard self.isScrollingActive else { return }
             
             self.currentDirection = self.currentDirection == .down ? .up : .down
-            print("Направление изменено: \(self.currentDirection == .down ? "Вниз" : "Вверх")")
+            
+            // Перезапускаем таймер с новым случайным интервалом
+            self.directionTimer?.invalidate()
+            self.startDirectionTimer()
         }
     }
+    
+//    private func startDirectionTimer() {
+//        // Меняем направление каждые 15 секунд
+//        directionTimer = Timer.scheduledTimer(withTimeInterval: 15, repeats: true) { _ in
+//            guard self.isScrollingActive else { return }
+//            
+//            self.currentDirection = self.currentDirection == .down ? .up : .down
+//        }
+//    }
 }
 
 struct ContentView: View {
@@ -80,16 +91,20 @@ struct ContentView: View {
     var body: some View {
         VStack(spacing: 20) {
             // Переключатель в основном окне
-            Toggle("Системный автоскролл", isOn: $scrollManager.isScrollingEnabled)
-                .toggleStyle(.switch)
-                .onChange(of: scrollManager.isScrollingEnabled) { oldValue, newValue in
-                    if newValue {
-                        scrollManager.startScrolling()
-                    } else {
-                        scrollManager.stopScrolling()
+            if #available(macOS 14.0, *) {
+                Toggle("Системный автоскролл", isOn: $scrollManager.isScrollingEnabled)
+                    .toggleStyle(.switch)
+                    .onChange(of: scrollManager.isScrollingEnabled) { oldValue, newValue in
+                        if newValue {
+                            scrollManager.startScrolling()
+                        } else {
+                            scrollManager.stopScrolling()
+                        }
                     }
-                }
-                .padding()
+                    .padding()
+            } else {
+                // Fallback on earlier versions
+            }
             
             // Информация о статусе
             VStack(spacing: 10) {
@@ -166,7 +181,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         popover.behavior = .transient
     }
     
-    @objc func togglePopover() {
+    @objc
+    func togglePopover() {
         if let button = statusBarItem.button {
             if popover.isShown {
                 popover.performClose(nil)
@@ -186,7 +202,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
-// Точка входа приложения
 @main
 struct AutoScrollApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
