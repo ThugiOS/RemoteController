@@ -188,7 +188,7 @@ final class ScrollManager: ObservableObject {
         startScrollCycle()
         
         // Запускаем таймер автоматического повторения каждые 15 минут
-        autoRepeatTimer = Timer.scheduledTimer(withTimeInterval: 100.0, repeats: true) { _ in
+        autoRepeatTimer = Timer.scheduledTimer(withTimeInterval: 900.0, repeats: true) { _ in
             self.startScrollCycle()
         }
     }
@@ -312,16 +312,16 @@ struct ContentView: View {
             }
             
             // Отображение времени до следующего скролла
-            if let nextTime = nextScrollTime, scrollManager.isScrollingEnabled {
-                VStack {
-                    Text("Следующий скролл через:")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Text(countdownString(from: nextTime))
-                        .font(.title2.monospacedDigit())
-                        .foregroundColor(.primary)
-                }
-            }
+//            if let nextTime = nextScrollTime, scrollManager.isScrollingEnabled {
+//                VStack {
+//                    Text("Следующий скролл через:")
+//                        .font(.caption)
+//                        .foregroundColor(.secondary)
+//                    Text(countdownString(from: nextTime))
+//                        .font(.title2.monospacedDigit())
+//                        .foregroundColor(.primary)
+//                }
+//            }
         }
         .padding()
         .frame(width: 350, height: 150)
